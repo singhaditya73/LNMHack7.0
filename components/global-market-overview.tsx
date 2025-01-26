@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getGlobalMarketData } from "@/lib/coingecko"
-import { Loader2 } from "lucide-react" // Assuming you have an icon library like lucide-react
+import { Loader2 } from "lucide-react"
 
 export function GlobalMarketOverview() {
   const [globalData, setGlobalData] = useState<any>(null)
@@ -39,6 +39,15 @@ export function GlobalMarketOverview() {
     )
   }
 
+  // Ensure data exists before rendering
+  if (!globalData || !globalData.data) {
+    return (
+      <div className="text-center p-4 text-gray-500">
+        <p>No data available.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       <Card className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white hover:shadow-xl transition-shadow max-w-full">
@@ -46,7 +55,9 @@ export function GlobalMarketOverview() {
           <CardTitle className="text-sm font-medium">Total Market Cap</CardTitle>
         </CardHeader>
         <CardContent className="overflow-auto">
-          <div className="text-xl md:text-2xl  font-semibold">{globalData.data.total_market_cap.usd.toLocaleString()}</div>
+          <div className="text-xl md:text-2xl font-semibold">
+            {globalData?.data?.total_market_cap?.usd?.toLocaleString() || "N/A"}
+          </div>
         </CardContent>
       </Card>
       <Card className="bg-gradient-to-br from-green-500 to-teal-500 text-white hover:shadow-xl transition-shadow max-w-full">
@@ -54,7 +65,9 @@ export function GlobalMarketOverview() {
           <CardTitle className="text-sm font-medium">24h Volume</CardTitle>
         </CardHeader>
         <CardContent className="overflow-auto">
-          <div className="text-xl md:text-2xl font-semibold">{globalData.data.total_volume.usd.toLocaleString()}</div>
+          <div className="text-xl md:text-2xl font-semibold">
+            {globalData?.data?.total_volume?.usd?.toLocaleString() || "N/A"}
+          </div>
         </CardContent>
       </Card>
       <Card className="bg-gradient-to-br from-yellow-500 to-orange-500 text-white hover:shadow-xl transition-shadow max-w-full">
@@ -62,7 +75,9 @@ export function GlobalMarketOverview() {
           <CardTitle className="text-sm font-medium">BTC Dominance</CardTitle>
         </CardHeader>
         <CardContent className="overflow-auto">
-          <div className="text-xl md:text-2xl font-semibold">{globalData.data.market_cap_percentage.btc.toFixed(2)}%</div>
+          <div className="text-xl md:text-2xl font-semibold">
+            {globalData?.data?.market_cap_percentage?.btc?.toFixed(2) || "N/A"}%
+          </div>
         </CardContent>
       </Card>
       <Card className="bg-gradient-to-br from-red-500 to-pink-500 text-white hover:shadow-xl transition-shadow max-w-full">
@@ -70,7 +85,9 @@ export function GlobalMarketOverview() {
           <CardTitle className="text-sm font-medium">Active Cryptocurrencies</CardTitle>
         </CardHeader>
         <CardContent className="overflow-auto">
-          <div className="text-xl md:text-2xl font-semibold">{globalData.data.active_cryptocurrencies}</div>
+          <div className="text-xl md:text-2xl font-semibold">
+            {globalData?.data?.active_cryptocurrencies || "N/A"}
+          </div>
         </CardContent>
       </Card>
     </div>

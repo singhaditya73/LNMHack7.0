@@ -33,7 +33,14 @@ export default async function CoinPage({ params }: { params: { id: string } }) {
           </CardContent>
         </Card>
 
-        
+        <Card>
+          <CardHeader>
+            <CardTitle>Price Chart (7 Days)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CoinChart coinId={coin.id} days={7} />
+          </CardContent>
+        </Card>
       </div>
 
       <Card className="mt-8">
