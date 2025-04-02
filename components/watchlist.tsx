@@ -1,36 +1,89 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-type WatchlistItem = {
+interface WatchlistItem {
   id: string
-  name: string
-  symbol: string
+  coin: {
+    id: string
+    name: string
+    symbol: string
+  }
   current_price: number
   price_change_percentage_24h: number
 }
 
 export default function WatchlistComponent({ userId }: { userId: string }) {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Fetch watchlist from API
-    fetch(`/api/watchlist?userId=${userId}`)
-      .then((res) => res.json())
-      .then((data) => setWatchlist(data))
+    const fetchWatchlist = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await fetch(`/api/watchlist?userId=${userId}`)
+        if (!response.ok) {
+          throw new Error("Failed to fetch watchlist")
+        }
+        const data = await response.json()
+        setWatchlist(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchWatchlist()
   }, [userId])
 
   const removeFromWatchlist = async (coinId: string) => {
-    await fetch(`/api/watchlist`, {
-      method: "DELETE",
-      body: JSON.stringify({ userId, coinId }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    setWatchlist(watchlist.filter((item) => item.id !== coinId))
+    try {
+      const response = await fetch(`/api/watchlist`, {
+        method: "DELETE",
+        body: JSON.stringify({ userId, coinId }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to remove from watchlist")
+      }
+
+      setWatchlist(watchlist.filter((item) => item.coin.id !== coinId))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to remove from watchlist")
+    }
+  }
+
+  if (loading) {
+    return <div className="text-center py-4">Loading watchlist...</div>
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    )
+  }
+
+  if (watchlist.length === 0) {
+    return <div className="text-center py-4">Your watchlist is empty</div>
   }
 
   return (
@@ -49,14 +102,14 @@ export default function WatchlistComponent({ userId }: { userId: string }) {
           {watchlist.map((item) => (
             <TableRow key={item.id}>
               <TableCell>
-                {item.name} ({item.symbol.toUpperCase()})
+                {item.coin.name} ({item.coin.symbol.toUpperCase()})
               </TableCell>
               <TableCell>${item.current_price.toLocaleString()}</TableCell>
               <TableCell className={item.price_change_percentage_24h >= 0 ? "text-green-600" : "text-red-600"}>
                 {item.price_change_percentage_24h.toFixed(2)}%
               </TableCell>
               <TableCell>
-                <Button variant="destructive" onClick={() => removeFromWatchlist(item.id)}>
+                <Button variant="destructive" onClick={() => removeFromWatchlist(item.coin.id)}>
                   Remove
                 </Button>
               </TableCell>

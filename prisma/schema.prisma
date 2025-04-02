@@ -37,7 +37,6 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
-  password  String?
   emailVerified DateTime?
   image         String?
   accounts      Account[]
@@ -65,7 +64,7 @@ model WatchlistItem {
 }
 
 model Coin {
-  id            String   @id
+  id            String   @id @default(cuid())
   name          String
   symbol        String
   watchlistItems WatchlistItem[]
